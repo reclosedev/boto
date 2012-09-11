@@ -36,7 +36,7 @@ class Group:
         elif name == 'groupName':
             self.name = value
         elif name == 'groupDescription':
-            self.name = value
+            self.description = value
         else:
             setattr(self, name, value)
     
