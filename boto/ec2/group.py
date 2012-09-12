@@ -26,6 +26,7 @@ class Group:
         self.id = None
         self.name = None
         self.description = None
+        self.type = None
 
     def startElement(self, name, attrs, connection):
         return None
@@ -37,6 +38,8 @@ class Group:
             self.name = value
         elif name == 'groupDescription':
             self.description = value
+        elif name == 'groupType':
+            self.type = value
         else:
             setattr(self, name, value)
     
