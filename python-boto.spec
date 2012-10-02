@@ -4,7 +4,7 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-boto
 Version:        2.4.1
-Release:        5CROC%{?dist}
+Release:        6CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Tue Oct  2 2012 Ruslan Bayburin <aedeph@gmail.com> 2.4.1-6
+- Revision 9fcefb3a3eb4188bcc5066b5332657ce743ca9bd
+
 * Tue Oct  2 2012 Stanislav Ievlev <stanislav.ievlev@gmail.com> 2.4.1-5
 - Revision c258d896a705d67de126819b044a3a486205ae7e
 
