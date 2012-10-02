@@ -31,6 +31,8 @@ class BlockDeviceType(object):
                  no_device=False,
                  volume_id=None,
                  snapshot_id=None,
+                 snapshot_size=None,
+                 snapshot_description=None,
                  status=None,
                  attach_time=None,
                  delete_on_termination=False,
@@ -44,6 +46,8 @@ class BlockDeviceType(object):
         self.no_device = no_device
         self.volume_id = volume_id
         self.snapshot_id = snapshot_id
+        self.snapshot_size = snapshot_size
+        self.snapshot_description = snapshot_description
         self.status = status
         self.attach_time = attach_time
         self.delete_on_termination = delete_on_termination
@@ -66,6 +70,10 @@ class BlockDeviceType(object):
             self.no_device = (value == 'true')
         elif name =='snapshotId':
             self.snapshot_id = value
+        elif name == 'snapshotSize':
+            self.snapshot_size = value
+        elif name == 'snapshotDescription':
+            self.snapshot_description = value
         elif name == 'volumeSize':
             self.size = int(value)
         elif name == 'status':
