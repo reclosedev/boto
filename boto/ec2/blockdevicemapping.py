@@ -87,7 +87,7 @@ class BlockDeviceType(object):
         elif name == "tierName":
             self.tier_name = value
         elif name == "tierReplication":
-            self.tier_replication = (value.lower() != "false")
+            self.tier_replication = (value.lower() == 'true')
         elif name == "isBootable":
             self.is_bootable = (value == 'true')
         elif name == 'deleteOnTermination':
