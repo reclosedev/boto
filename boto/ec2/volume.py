@@ -98,7 +98,7 @@ class Volume(TaggedEC2Object):
         elif name == 'tierName':
             self.tier_name = value
         elif name == 'tierReplication':
-            self.tier_replication = value
+            self.tier_replication = (value.lower() == 'true')
         elif name == 'sizeInBytes':
             self.size_in_bytes = int(value)
         elif name == 'description':
