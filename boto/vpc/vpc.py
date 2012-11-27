@@ -33,6 +33,7 @@ class VPC(TaggedEC2Object):
         self.dhcp_options_id = None
         self.state = None
         self.cidr_block = None
+        self.availability_zone = None
 
     def __repr__(self):
         return 'VPC:%s' % self.id
@@ -46,6 +47,8 @@ class VPC(TaggedEC2Object):
             self.state = value
         elif name == 'cidrBlock':
             self.cidr_block = value
+        elif name == 'availabilityZone':
+            self.availability_zone = value
         else:
             setattr(self, name, value)
 
