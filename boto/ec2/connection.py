@@ -55,6 +55,7 @@ from boto.ec2.tag import Tag
 from boto.ec2.instancestatus import InstanceStatusSet
 from boto.ec2.volumestatus import VolumeStatusSet
 from boto.ec2.networkinterface import NetworkInterface
+from boto.ec2.private_ip import PrivateIP
 from boto.exception import BotoClientError, EC2ResponseError
 
 #boto.set_stream_logger('ec2')
@@ -1297,7 +1298,8 @@ class EC2Connection(AWSQueryConnection):
         return self.get_object('AllocateAddress', params, Address, verb='POST')
 
     def associate_address(self, instance_id=None, public_ip=None,
-                          allocation_id=None, network_interface_id=None):
+                          allocation_id=None, network_interface_id=None,
+                          private_ip_address_id=None):
         """
         Associate an Elastic IP address with a currently running instance.
         This requires one of ``public_ip`` or ``allocation_id`` depending
@@ -1316,6 +1318,10 @@ class EC2Connection(AWSQueryConnection):
         : param network_interface_id: The network interface ID to which
             elastic IP is to be assigned to
 
+        :type private_ip_address_id: string
+        :param private_ip_address_id: The private IP address ID to which
+            elastic IP is to be assigned to
+
         :rtype: bool
         :return: True if successful
         """
@@ -1324,6 +1330,8 @@ class EC2Connection(AWSQueryConnection):
                 params['InstanceId'] = instance_id
         elif network_interface_id is not None:
                 params['NetworkInterfaceId'] = network_interface_id
+        elif private_ip_address_id is not None:
+                params['PrivateIpAddressId'] = private_ip_address_id
 
         if public_ip is not None:
             params['PublicIp'] = public_ip
@@ -3094,3 +3102,79 @@ class EC2Connection(AWSQueryConnection):
         """
         params = {'NetworkInterfaceId' : network_interface_id}
         return self.get_status('DeleteNetworkInterface', params, verb='POST')
+
+    # Private IP methods
+
+    def get_all_private_ips(self, private_ip_address_ids=None, filters=None):
+        """
+        Get all Private IP Addresses.
+
+        :type private_ip_address_ids: list
+        :param private_ip_address_ids: Optional list of private IP address IDs.
+                                       If this list is present, only the
+                                       private IP addresses with these IDs will
+                                       be returned.
+
+        :type filters: dict
+        :param filters: Optional filters that can be used to limit
+                        the results returned.  Filters are provided
+                        in the form of a dictionary consisting of
+                        filter names as the key and filter values
+                        as the value.  The set of allowable filter
+                        names/values is dependent on the request
+                        being performed.  Check the EC2 API guide
+                        for details.
+
+        :rtype: list of :class:`boto.ec2.private_ip.PrivateIP`
+        :return: The requested PrivateIp objects
+        """
+        params = {}
+        if private_ip_address_ids:
+            self.build_list_params(params, private_ip_address_ids, 'PrivateIpAddressId')
+        if filters:
+            self.build_filter_params(params, filters)
+        return self.get_list('DescribePrivateIpAddresses', params, [('item', PrivateIP)], verb='POST')
+
+    def allocate_private_ip(self, security_group, private_ip_address=None, availability_zone=None):
+        """
+        Allocate Private IP in specified Security Group.
+
+        :type security_group: string
+        :param security_group: The name of the security group in which to
+                                allocate private IP address
+
+        :type private_ip_address: string
+        :param private_ip_address: You can optionally use this parameter to
+                                   allocate a specific available IP address
+                                   (e.g., 10.0.0.25).
+
+        :type availability_zone: string
+        :param availability_zone: The availability zone in which pivate IP
+                                  address should be allocated
+
+        :rtype: :class:`boto.ec2.private_ip.PrivateIP`
+        :return: The newly allocated Private IP Address
+        """
+        params = {}
+        if isinstance(security_group, SecurityGroup):
+            params['SecurityGroup'] = security_group.name
+        else:
+            params['SecurityGroup'] = security_group
+        if private_ip_address is not None:
+            params['PrivateIpAddress'] = private_ip_address
+        if availability_zone is not None:
+            params['AvailabilityZone'] = availability_zone
+        return self.get_object('AllocatePrivateIpAddress', params, PrivateIP, verb='POST')
+
+    def delete_private_ip_address(self, private_ip_address_id):
+        """
+        Delete Private IP Address.
+
+        :type private_ip_address_id: string
+        :param private_ip_address_id: The ID of the private IP address to be deleted.
+
+        :rtype: bool
+        :return: True if successful
+        """
+        params = {'PrivateAddressId': private_ip_address_id}
+        return self.get_status('DeletePrivateIpAddress', params, verb='POST')
