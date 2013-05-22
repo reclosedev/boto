@@ -843,6 +843,20 @@ class EC2Connection(AWSQueryConnection):
 
         return self.get_object('SnapshotInstance', params, PlainXmlDict, verb='POST')
 
+    def attach_virtual_network(self, instance_id, network_id):
+        """
+        Attach virtual network to (stopped) instance.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        :type network_id: string
+        :param network_id: The ID of the virtual network to be attached
+        """
+        params = {'InstanceId' : instance_id,
+                  'NetworkId' : network_id}
+        return self.get_status('AttachVirtualNetwork', params, verb='POST')
+
     # InstanceAttribute methods
 
     def get_instance_attribute(self, instance_id, attribute):
