@@ -808,22 +808,6 @@ class EC2Connection(AWSQueryConnection):
         return self.get_list('StopInstances', params,
                              [('item', Instance)], verb='POST')
 
-    def suspend_instances(self, instance_ids):
-        """
-        Suspend the instances specified
-
-        :type instance_ids: list
-        :param instance_ids: A list of strings of the Instance IDs to suspend
-
-        :rtype: list
-        :return: A list of the instances suspended
-        """
-
-        params = {}
-        self.build_list_params(params, instance_ids, 'InstanceId')
-
-        return self.get_list('SuspendInstances', params, [('item', Instance)], verb='POST')
-
     def start_instances(self, instance_ids=None):
         """
         Start the instances specified
@@ -872,38 +856,6 @@ class EC2Connection(AWSQueryConnection):
         rs = self.get_object('ConfirmProductInstance', params,
                              ResultSet, verb='POST')
         return (rs.status, rs.ownerId)
-
-    def snapshot_instance(self, instance_id, description = None):
-        """
-        Create an image from a stopped instance.
-
-        :type instance_id: string
-        :param instance_id: The instance ID.
-
-        :type description: string
-        :param description: The image description.
-        """
-
-        params = {'InstanceId' : instance_id}
-
-        if description is not None:
-            params['ImageDescription'] = description
-
-        return self.get_object('SnapshotInstance', params, PlainXmlDict, verb='POST')
-
-    def attach_virtual_network(self, instance_id, network_id):
-        """
-        Attach virtual network to (stopped) instance.
-
-        :type instance_id: string
-        :param instance_id: The instance ID.
-
-        :type network_id: string
-        :param network_id: The ID of the virtual network to be attached
-        """
-        params = {'InstanceId' : instance_id,
-                  'NetworkId' : network_id}
-        return self.get_status('AttachVirtualNetwork', params, verb='POST')
 
     # InstanceAttribute methods
 
@@ -1641,16 +1593,6 @@ class EC2Connection(AWSQueryConnection):
                                verb='POST')
 
     # Volume methods
-
-    def get_all_tier_types(self):
-        """
-        Get all available tier types.
-
-        :rtype: list of :class:`boto.ec2.volume.TierType`
-        :return: The requested TierType objects
-        """
-        return self.get_list('DescribeTierTypes', {},
-                             [('item', TierType)], verb='POST')
 
     def get_all_volumes(self, volume_ids=None, filters=None):
         """
@@ -2819,32 +2761,6 @@ class EC2Connection(AWSQueryConnection):
         return self.get_status('RevokeSecurityGroupEgress',
                                params, verb='POST')
 
-    def attach_extnetwork(self, network_name, group_name):
-        """Attach an external network.
-
-        :type network_name: string
-        :param network_name: The name of the external network.
-
-        :type group_name: string
-        :param group_name: The name of the security group.
-        """
-        params = {'ExtNetName' : network_name,
-                  'GroupName': group_name}
-        return self.get_status('AttachExtNetwork', params, verb='POST')
-
-    def get_all_extnetworks(self):
-        """Get all available external networks."""
-        return self.get_list('DescribeExtNetworks', {}, [( 'item', ExtNetwork )], verb='POST')
-
-    def detach_extnetwork(self, network_name):
-        """Detach an external network.
-
-        :type network_name: string
-        :param network_name: The name of the external network.
-        """
-        params = {'ExtNetName' : network_name}
-        return self.get_status('DetachExtNetwork', params, verb='POST')
-
     #
     # Regions
     #
@@ -3612,6 +3528,98 @@ class EC2Connection(AWSQueryConnection):
                 'true' if enable_dns_hostnames else 'false')
         result = self.get_status('ModifyVpcAttribute', params, verb='POST')
         return result
+
+    ## C2 specific methods
+
+    # Instances
+
+    def attach_virtual_network(self, instance_id, network_id):
+        """
+        Attach virtual network to (stopped) instance.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        :type network_id: string
+        :param network_id: The ID of the virtual network to be attached
+        """
+        params = {'InstanceId' : instance_id,
+                  'NetworkId' : network_id}
+        return self.get_status('AttachVirtualNetwork', params, verb='POST')
+
+    def snapshot_instance(self, instance_id, description = None):
+        """
+        Create an image from a stopped instance.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        :type description: string
+        :param description: The image description.
+        """
+
+        params = {'InstanceId' : instance_id}
+
+        if description is not None:
+            params['ImageDescription'] = description
+
+        return self.get_object('SnapshotInstance', params, PlainXmlDict, verb='POST')
+
+    def suspend_instances(self, instance_ids):
+        """
+        Suspend the instances specified
+
+        :type instance_ids: list
+        :param instance_ids: A list of strings of the Instance IDs to suspend
+
+        :rtype: list
+        :return: A list of the instances suspended
+        """
+
+        params = {}
+        self.build_list_params(params, instance_ids, 'InstanceId')
+
+        return self.get_list('SuspendInstances', params, [('item', Instance)], verb='POST')
+
+   # Tier types
+
+    def get_all_tier_types(self):
+        """
+        Get all available tier types.
+
+        :rtype: list of :class:`boto.ec2.volume.TierType`
+        :return: The requested TierType objects
+        """
+        return self.get_list('DescribeTierTypes', {},
+                             [('item', TierType)], verb='POST')
+
+    # External networks
+
+    def attach_extnetwork(self, network_name, group_name):
+        """Attach an external network.
+
+        :type network_name: string
+        :param network_name: The name of the external network.
+
+        :type group_name: string
+        :param group_name: The name of the security group.
+        """
+        params = {'ExtNetName' : network_name,
+                  'GroupName': group_name}
+        return self.get_status('AttachExtNetwork', params, verb='POST')
+
+    def get_all_extnetworks(self):
+        """Get all available external networks."""
+        return self.get_list('DescribeExtNetworks', {}, [( 'item', ExtNetwork )], verb='POST')
+
+    def detach_extnetwork(self, network_name):
+        """Detach an external network.
+
+        :type network_name: string
+        :param network_name: The name of the external network.
+        """
+        params = {'ExtNetName' : network_name}
+        return self.get_status('DetachExtNetwork', params, verb='POST')
 
     # Private IP methods
 
