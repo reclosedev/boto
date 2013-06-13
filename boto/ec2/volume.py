@@ -26,7 +26,7 @@ Represents an EC2 Elastic Block Storage Volume
 """
 from boto.resultset import ResultSet
 from boto.ec2.tag import Tag
-from boto.ec2.ec2object import TaggedEC2Object
+from boto.ec2.ec2object import EC2Object, TaggedEC2Object
 
 
 class TierType(EC2Object):
