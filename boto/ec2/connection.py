@@ -1967,7 +1967,7 @@ class EC2Connection(AWSQueryConnection):
 
         :type description: str
         :param description: A description of the snapshot.
-            Limited to 255 characters.
+                            Limited to 255 characters.
 
         :rtype: :class:`boto.ec2.snapshot.Snapshot`
         :return: The created Snapshot object
