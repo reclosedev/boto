@@ -13,8 +13,11 @@ Creating a Connection
 The first step in accessing SimpleDB is to create a connection to the service.
 To do so, the most straight forward way is the following::
 
-    >>> import boto
-    >>> conn = boto.connect_sdb(aws_access_key_id='<YOUR_AWS_KEY_ID>',aws_secret_access_key='<YOUR_AWS_SECRET_KEY>')
+    >>> import boto.sdb
+    >>> conn = boto.sdb.connect_to_region(
+    ...     'us-west-2',
+    ...     aws_access_key_id='<YOUR_AWS_KEY_ID>',
+    ...     aws_secret_access_key='<YOUR_AWS_SECRET_KEY>')
     >>> conn
     SDBConnection:sdb.amazonaws.com
     >>>
@@ -109,11 +112,11 @@ Now let's check if it worked::
 
 Batch Adding Items (and attributes)
 -----------------------------------
-You can also add a number of items at the same time in a similar fashion. All you have to provide to the batch_put_items() method 
+You can also add a number of items at the same time in a similar fashion. All you have to provide to the batch_put_attributes() method 
 is a Dictionary-like object with your items and their respective attributes, as follows::
 
     >>> items = {'item1':{'attr1':'val1'},'item2':{'attr2':'val2'}}
-    >>> dom.batch_put_items(items)
+    >>> dom.batch_put_attributes(items)
     True
     >>>
 
@@ -124,7 +127,7 @@ Now, let's check the item count once again::
     3
     >>>
 
-A few words of warning: both batch_put_items() and put_item(), by default, will overwrite the values of the attributes if both 
+A few words of warning: both batch_put_attributes() and put_item(), by default, will overwrite the values of the attributes if both 
 the item and attribute already exist. If the item exists, but not the attributes, it will append the new attributes to the 
 attribute list of that item. If you do not wish these methods to behave in that manner, simply supply them with a 'replace=False'
 parameter.

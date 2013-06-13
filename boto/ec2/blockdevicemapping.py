@@ -1,4 +1,5 @@
-# Copyright (c) 2009 Mitch Garnaat http://garnaat.org/
+# Copyright (c) 2009-2012 Mitch Garnaat http://garnaat.org/
+# Copyright (c) 2012 Amazon.com, Inc. or its affiliates.  All Rights Reserved
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -14,11 +15,12 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
+
 
 class BlockDeviceType(object):
     """
@@ -37,6 +39,8 @@ class BlockDeviceType(object):
                  attach_time=None,
                  delete_on_termination=False,
                  size=None,
+                 volume_type=None,
+                 iops=None,
                  attach_type=None,
                  tier_type=None,
                  tier_name=None,
@@ -52,6 +56,8 @@ class BlockDeviceType(object):
         self.attach_time = attach_time
         self.delete_on_termination = delete_on_termination
         self.size = size
+        self.volume_type = volume_type
+        self.iops = iops
         self.attach_type = attach_type
         self.tier_type = tier_type
         self.tier_name = tier_name
@@ -62,13 +68,13 @@ class BlockDeviceType(object):
         pass
 
     def endElement(self, name, value, connection):
-        if name =='volumeId':
+        if name == 'volumeId':
             self.volume_id = value
         elif name == 'virtualName':
             self.ephemeral_name = value
-        elif name =='NoDevice':
+        elif name == 'NoDevice':
             self.no_device = (value == 'true')
-        elif name =='snapshotId':
+        elif name == 'snapshotId':
             self.snapshot_id = value
         elif name == 'snapshotSize':
             self.snapshot_size = value
@@ -80,6 +86,12 @@ class BlockDeviceType(object):
             self.status = value
         elif name == 'attachTime':
             self.attach_time = value
+        elif name == 'deleteOnTermination':
+            self.delete_on_termination = (value == 'true')
+        elif name == 'volumeType':
+            self.volume_type = value
+        elif name == 'iops':
+            self.iops = int(value)
         elif name == "attachType":
             self.attach_type = value
         elif name == "tierType":
@@ -90,11 +102,6 @@ class BlockDeviceType(object):
             self.tier_replication = (value.lower() == 'true')
         elif name == "isBootable":
             self.is_bootable = (value == 'true')
-        elif name == 'deleteOnTermination':
-            if value == 'true':
-                self.delete_on_termination = True
-            else:
-                self.delete_on_termination = False
         else:
             setattr(self, name, value)
 
@@ -102,13 +109,14 @@ class BlockDeviceType(object):
 # for backwards compatibility
 EBSBlockDeviceType = BlockDeviceType
 
+
 class BlockDeviceMapping(dict):
     """
     Represents a collection of BlockDeviceTypes when creating ec2 instances.
 
-    Example: 
+    Example:
     dev_sda1 = BlockDeviceType()
-    dev_sda1.size = 100   # change root volume to 100GB instead of default for ami
+    dev_sda1.size = 100   # change root volume to 100GB instead of default
     bdm = BlockDeviceMapping()
     bdm['/dev/sda1'] = dev_sda1
     reservation = image.run(..., block_device_map=bdm, ...)
@@ -146,20 +154,25 @@ class BlockDeviceMapping(dict):
             else:
                 if block_dev.no_device:
                     params['%s.Ebs.NoDevice' % pre] = 'true'
-                if block_dev.snapshot_id:
-                    params['%s.Ebs.SnapshotId' % pre] = block_dev.snapshot_id
-                if block_dev.size:
-                    params['%s.Ebs.VolumeSize' % pre] = block_dev.size
-                if block_dev.tier_type is not None:
-                    params['%s.Ebs.TierType' % pre] = block_dev.tier_type
-                if block_dev.tier_name is not None:
-                    params['%s.Ebs.TierName' % pre] = block_dev.tier_name
-                if block_dev.tier_replication is not None:
-                    params['%s.Ebs.TierReplication' % pre] = block_dev.tier_replication
-                if block_dev.attach_type:
-                    params['%s.Ebs.AttachType' % pre] = block_dev.attach_type
-                if block_dev.delete_on_termination:
-                    params['%s.Ebs.DeleteOnTermination' % pre] = 'true'
                 else:
-                    params['%s.Ebs.DeleteOnTermination' % pre] = 'false'
+                    if block_dev.snapshot_id:
+                        params['%s.Ebs.SnapshotId' % pre] = block_dev.snapshot_id
+                    if block_dev.size:
+                        params['%s.Ebs.VolumeSize' % pre] = block_dev.size
+                    if block_dev.delete_on_termination:
+                        params['%s.Ebs.DeleteOnTermination' % pre] = 'true'
+                    else:
+                        params['%s.Ebs.DeleteOnTermination' % pre] = 'false'
+                    if block_dev.volume_type:
+                        params['%s.Ebs.VolumeType' % pre] = block_dev.volume_type
+                    if block_dev.iops is not None:
+                        params['%s.Ebs.Iops' % pre] = block_dev.iops
+                    if block_dev.tier_type is not None:
+                        params['%s.Ebs.TierType' % pre] = block_dev.tier_type
+                    if block_dev.tier_name is not None:
+                        params['%s.Ebs.TierName' % pre] = block_dev.tier_name
+                    if block_dev.tier_replication is not None:
+                        params['%s.Ebs.TierReplication' % pre] = block_dev.tier_replication
+                    if block_dev.attach_type:
+                        params['%s.Ebs.AttachType' % pre] = block_dev.attach_type
             i += 1
