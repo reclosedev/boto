@@ -3,8 +3,8 @@
 
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-boto
-Version:        2.4.1
-Release:        11CROC%{?dist}
+Version:        2.9.5
+Release:        1CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
@@ -12,7 +12,7 @@ BuildRequires:  python-devel, python-setuptools
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Epoch:          %(date +%s)
-Source0:        boto.tar.gz
+Source0:        boto.tar
 Provides:       %name = %version-%release
 
 %description
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Thu Jun 13 2013 Stanislav Ievlev <stanislav.ievlev@gmail.com> 2.9.5-1
+- Updated to 2.9.5
+
 * Wed May 22 2013 Alexey I. Froloff <raorn@raorn.name> - 2.4.1-11
 - Revision 2.1.1-757-gde03aa3
 
