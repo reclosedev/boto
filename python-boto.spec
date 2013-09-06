@@ -4,7 +4,7 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-boto
 Version:        2.9.5
-Release:        2CROC%{?dist}
+Release:        3CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Thu Sep 05 2013 Nikita Kovrigin <nikitakovrigin@gmail.com> 2.9.5-3CROC 
+- Added arg private_dns_name to run_instances()
+
 * Wed Aug 07 2013 Dmitry Konishchev <konishchev@gmail.com> 2.9.5-2CROC
 - Fix the epoch
 
