@@ -1531,7 +1531,7 @@ class EC2Connection(AWSQueryConnection):
         :param new_value: The new value of the attribute.
         """
         params = {'VolumeId': volume_id}
-        if attribute in ('AutoEnableIO', 'Description', 'Size', 'TierType'):
+        if attribute in ('AutoEnableIO', 'Description', 'Size', 'TierType', 'Iops'):
             params[attribute + '.Value'] = new_value
         return self.get_status('ModifyVolumeAttribute', params, verb='POST')
 
