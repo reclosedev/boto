@@ -1531,11 +1531,12 @@ class EC2Connection(AWSQueryConnection):
         :param new_value: The new value of the attribute.
         """
         params = {'VolumeId': volume_id}
-        if attribute in ('AutoEnableIO', 'Description', 'Size', 'TierType'):
+        if attribute in ('AutoEnableIO', 'Description', 'Size', 'TierType', 'Iops'):
             params[attribute + '.Value'] = new_value
         return self.get_status('ModifyVolumeAttribute', params, verb='POST')
 
-    def create_volume(self, size, zone, snapshot=None, tier_type=None):
+    def create_volume(self, size, zone, snapshot=None, tier_type=None,
+                      volume_type=None, iops=None):
         """
         Create a new EBS Volume.
 
@@ -1550,6 +1551,12 @@ class EC2Connection(AWSQueryConnection):
 
         :type tier_type: string
         :param tier_type: Tier type ID on which the new Volume will be created.
+
+        :type volume_type: string
+        :param volume_type: Volume type on which the new Volume will be created
+
+        :type iops: int
+        :param iops: IOPS for the new Volume will be created.
         """
         if isinstance(zone, Zone):
             zone = zone.name
@@ -1562,6 +1569,10 @@ class EC2Connection(AWSQueryConnection):
             params['SnapshotId'] = snapshot
         if tier_type:
             params['TierType'] = tier_type
+        if volume_type:
+            params['VolumeType'] = volume_type
+        if iops:
+            params['Iops'] = iops
         return self.get_object('CreateVolume', params, Volume, verb='POST')
 
     def delete_volume(self, volume_id):
