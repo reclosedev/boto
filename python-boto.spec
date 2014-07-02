@@ -4,7 +4,7 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-boto
 Version:        2.4.1
-Release:        11CROC%{?dist}
+Release:        12CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
@@ -42,6 +42,10 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Wed Jul 02 2014 Mikhail Ushanov <MiUshanov@croc.ru> - 2.4.1-12
+- Added Makefile for native build in Koji
+- Added support of multiple volume types
+
 * Wed May 22 2013 Alexey I. Froloff <raorn@raorn.name> - 2.4.1-11
 - Revision 2.1.1-757-gde03aa3
 
