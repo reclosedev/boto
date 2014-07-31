@@ -11,7 +11,7 @@ URL:            http://github.com/C2Devel/boto
 BuildRequires:  python-devel, python-setuptools
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Epoch:          %(date +%s)
+Epoch:          1409529600
 Source0:        boto.tar.gz
 Provides:       %name = %version-%release
 
@@ -42,9 +42,11 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
-* Wed Jul 02 2014 Mikhail Ushanov <MiUshanov@croc.ru> - 2.4.1-12
+* Thu Jul 31 2014 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.4.1-12
 - Added Makefile for native build in Koji
 - Added support of multiple volume types
+- Fix 'detach_volume' return value
+- Epoch stabilized
 
 * Wed May 22 2013 Alexey I. Froloff <raorn@raorn.name> - 2.4.1-11
 - Revision 2.1.1-757-gde03aa3
