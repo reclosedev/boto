@@ -1606,8 +1606,9 @@ class EC2Connection(AWSQueryConnection):
         :type attach_type str
         :param attach_type: Volume attachment type (generic|database)
 
-        :rtype: bool
-        :return: True if successful
+        :rtype: AttachmentSet
+        :return: Attribute status of returned object will be 'attached'
+        in case of success
         """
         params = {'InstanceId' : instance_id,
                   'VolumeId' : volume_id}
@@ -1645,8 +1646,9 @@ class EC2Connection(AWSQueryConnection):
                       caches nor file system meta data. If you use this option,
                       you must perform file system check and repair procedures.
 
-        :rtype: bool
-        :return: True if successful
+        :rtype: AttachmentSet
+        :return: Attribute status of returned object will be 'detached'
+        in case of success
         """
         params = {'VolumeId' : volume_id}
         if instance_id:
@@ -1655,7 +1657,7 @@ class EC2Connection(AWSQueryConnection):
             params['Device'] = device
         if force:
             params['Force'] = 'true'
-        return self.get_status('DetachVolume', params, verb='POST')
+        return self.get_object('DetachVolume', params, AttachmentSet, verb = 'POST')
 
     # Snapshot methods
 
