@@ -42,6 +42,12 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Tue Jan 13 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.4.1-13
+- Added field private_ip_address into response.
+- Added 'get_vpc_attribute' and 'modify_vpc_attribute' methods.
+- DetachVirtualNetwork EC2 API call.
+- Changes in spec and makefile.
+
 * Thu Jul 31 2014 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.4.1-12
 - Added Makefile for native build in Koji
 - Added support of multiple volume types
