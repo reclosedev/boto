@@ -65,4 +65,3 @@ class Subnet(TaggedEC2Object):
             self.availability_zone = value
         else:
             setattr(self, name, value)
-

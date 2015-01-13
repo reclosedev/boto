@@ -25,7 +25,7 @@ Represents a connection to the EC2 service.
 
 from boto.ec2.connection import EC2Connection
 from boto.resultset import ResultSet
-from boto.vpc.vpc import VPC
+from boto.vpc.vpc import VPC, VPCAttribute
 from boto.vpc.customergateway import CustomerGateway
 from boto.vpc.routetable import RouteTable
 from boto.vpc.internetgateway import InternetGateway
@@ -681,3 +681,60 @@ class VPCConnection(EC2Connection):
         """
         params = {'VpnConnectionId': vpn_connection_id}
         return self.get_status('DeleteVpnConnection', params)
+
+    def get_vpc_attribute(self, vpc_id, attribute=None):
+        """
+        Gets an attribute from a VPC.
+
+        :type vpc_id: string
+        :param vpc_id: The Amazon id of the VPC
+
+        :type attribute: string
+        :param attribute: The attribute you need information about
+                          Valid choices are:
+
+                          * enableDnsSupport
+                          * enableDnsHostnames
+
+        :rtype: :class:`boto.vpc.VPCAttribute`
+        :return: An VPCAttribute object representing the value of the
+                 attribute requested
+        """
+        params = {
+            'VpcId': vpc_id
+        }
+        if attribute is not None:
+            params['Attribute'] = attribute
+        return self.get_object('DescribeVpcAttribute', params,
+                               VPCAttribute, verb='POST')
+
+    def modify_vpc_attribute(self, vpc_id, attribute, value):
+        """
+        Modifies the specified attribute of the specified VPC.
+        You can only modify one attribute at a time.
+
+        :type vpc_id: string
+        :param vpc_id: The Amazon id of the VPC
+
+        :type attribute: string
+        :param attribute: The attribute you wish to change.
+
+                          * enableDnsSupport - Specifies whether the DNS server
+                            provided by Amazon is enabled for the VPC
+                          * enableDnsHostnames - Specifies whether DNS hostnames are
+                            provided for the instances launched in this VPC. You can only
+                            set this attribute to ``true`` if EnableDnsSupport
+                            is also ``true``.
+
+        """
+        if attribute:
+            if isinstance(value, bool):
+                if value:
+                    value = 'true'
+                else:
+                    value = 'false'
+        params = {
+            'VpcId': vpc_id,
+            '%s.Value' % (attribute[0].upper() + attribute[1:]): value
+        }
+        return self.get_status('ModifyVpcAttribute', params)

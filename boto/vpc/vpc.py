@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -37,7 +37,7 @@ class VPC(TaggedEC2Object):
 
     def __repr__(self):
         return 'VPC:%s' % self.id
-    
+
     def endElement(self, name, value, connection):
         if name == 'vpcId':
             self.id = value
@@ -55,3 +55,28 @@ class VPC(TaggedEC2Object):
     def delete(self):
         return self.connection.delete_vpc(self.id)
 
+class VPCAttribute(object):
+
+    def __init__(self, connection=None):
+        self.connection = connection
+        self.vpc_id = None
+        self.enable_dns_hostnames = None
+        self.enable_dns_support = None
+        self._current_attr = None
+
+    def startElement(self, name, attrs, connection):
+        if name in ('enableDnsHostnames', 'enableDnsSupport'):
+            self._current_attr = name
+
+    def endElement(self, name, value, connection):
+        if name == 'vpcId':
+            self.vpc_id = value
+        elif name == 'value':
+            if value == 'true':
+                value = True
+            else:
+                value = False
+            if self._current_attr == 'enableDnsHostnames':
+                self.enable_dns_hostnames = value
+            elif self._current_attr == 'enableDnsSupport':
+                self.enable_dns_support = value
