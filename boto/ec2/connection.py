@@ -857,6 +857,22 @@ class EC2Connection(AWSQueryConnection):
                   'NetworkId' : network_id}
         return self.get_status('AttachVirtualNetwork', params, verb='POST')
 
+    def detach_virtual_network(self, instance_id, network_id):
+        """
+        Detach virtual network from (stopped) instance.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        :type network_id: string
+        :param network_id: The ID of the virtual network to be detached
+        """
+
+        params = {'InstanceId': instance_id,
+                  'NetworkId': network_id}
+        return self.get_status('DetachVirtualNetwork', params, verb='POST')
+
+
     # InstanceAttribute methods
 
     def get_instance_attribute(self, instance_id, attribute):
