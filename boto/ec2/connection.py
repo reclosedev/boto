@@ -34,7 +34,8 @@ import boto
 from boto.connection import AWSQueryConnection
 from boto.resultset import ResultSet
 from boto.ec2.ec2object import PlainXmlDict
-from boto.ec2.image import Image, ImageAttribute, CopyImage, ImportTask, ExportTask, ConversionTask
+from boto.ec2.image import Image, ImageAttribute, CopyImage
+from boto.ec2.import_task import ImportImageTask, ImportSnapshotTask
 from boto.ec2.instance import Reservation, Instance
 from boto.ec2.instance import ConsoleOutput, InstanceAttribute
 from boto.ec2.keypair import KeyPair
@@ -139,6 +140,28 @@ class EC2Connection(AWSQueryConnection):
                 params['Filter.%d.Value.%d' % (i, j)] = v
                 j += 1
             i += 1
+
+    def build_dict_list_params(self, params, items, label):
+        if isinstance(items, str):
+            items = [items]
+        for i in range(1, len(items) + 1):
+            item = items[i - 1]
+            if isinstance(item, dict):
+                for key, value in self._flatten_dict(item).iteritems():
+                    params['%s.%d.%s' % (label, i, key)] = value
+            else:
+                params['%s.%d' % (label, i)] = item
+
+    def _flatten_dict(self, d):
+        def expand(key, value):
+            if isinstance(value, dict):
+                return [(key + '.' + k, v) for k, v in self._flatten_dict(value).items()]
+            else:
+                return [(key, value)]
+
+        items = [item for k, v in d.items() for item in expand(k, v)]
+
+        return dict(items)
 
     # Image methods
 
@@ -368,13 +391,21 @@ class EC2Connection(AWSQueryConnection):
         if description:
             params['Description'] = description
 
-        return self.get_object('ImportVolume', params, ConversionTask, verb='POST')
+        return self.get_object('ImportVolume', params, Reservation, verb='POST')
 
-    def import_instance(self, platform, architecture, instance_type, description=None):
+    def import_instance(self, platform, architecture, instance_type, bytes, format, import_manifest_url,
+                        description=None):
         params = {'Platform': platform}
+        params['LaunchSpecification.Architecture'] = architecture
+        params['LaunchSpecification.InstanceType'] = instance_type
+        params['DiskImage.1.Image.Bytes'] = bytes
+        params['DiskImage.1.Image.Format'] = format
+        params['DiskImage.1.Image.ImportManifestUrl'] = import_manifest_url
+        params['DiskImage.1.Volume.Size'] = bytes
+
         if description:
             params['Description'] = description
-        return self.get_object('ImportInstance', params, ConversionTask, verb='POST')
+        return self.get_object('ImportInstance', params, Reservation, verb='POST')
 
     def describe_conversion_tasks(self, conversion_task_ids, filters=None):
         params = {}
@@ -391,7 +422,7 @@ class EC2Connection(AWSQueryConnection):
                         UserWarning)
             self.build_filter_params(params, filters)
         return self.get_list('DescribeConversionTasks', params,
-                             [('item', ConversionTask)], verb='POST')
+                             [('item', Reservation)], verb='POST')
 
     def cancel_conversion_task(self, conversion_task_id, reason_message=None):
         params = {'ConversionTaskId': conversion_task_id}
@@ -399,32 +430,27 @@ class EC2Connection(AWSQueryConnection):
             params['ReasonMessage'] = reason_message
         return self.get_object('CancelConversionTask', params, Reservation, verb='POST')
 
-    def import_image(self, format, url, bucket, key, snapshot_id=None,
+    def import_image(self, disk_containers,
                      description=None, architecture=None, platform=None):
         params = {}
-        params['DiskContainer.1.Format'] = format
-        params['DiskContainer.1.Url'] = url
-        params['DiskContainer.1.UserBucket.S3Bucket'] = bucket
-        params['DiskContainer.1.UserBucket.S3Key'] = key
-        if snapshot_id:
-            params['DiskContainer.1.SnapshotId'] = snapshot_id
+        self.build_dict_list_params(params, disk_containers, 'DiskContainer')
         if architecture:
             params['Architecture'] = architecture
         if description:
             params['Description'] = description
         if platform:
             params['Platform'] = platform
-        return self.get_object('ImportImage', params, ImportTask, verb='POST')
+        return self.get_object('ImportImage', params, ImportImageTask, verb='POST')
 
     def import_snapshot(self, format, bucket, key, url, description=None):
         params = {}
-        params['DiskContainer.1.Format'] = format
+        params['DiskContainer.Format'] = format
         params['DiskContainer.Url'] = url
         params['DiskContainer.UserBucket.S3Bucket'] = bucket
         params['DiskContainer.UserBucket.S3Key'] = key
         if description:
             params['Description'] = description
-        return self.get_object('ImportSnapshot', params, ImportTask, verb='POST')
+        return self.get_object('ImportSnapshot', params, ImportSnapshotTask, verb='POST')
 
     def describe_images(self, owner=None):
         params = {}
@@ -444,7 +470,7 @@ class EC2Connection(AWSQueryConnection):
         return self.get_list('DescribeSnapshots', params,
                              [('item', Snapshot)], verb='POST')
 
-    def describe_import_snapshot_tasks(self, import_task_ids, filters=None):
+    def describe_import_snapshot_tasks(self, import_task_ids=None, filters=None):
         """
         Retrieve all the import snapshot tasks associated with your account.
 
@@ -463,13 +489,13 @@ class EC2Connection(AWSQueryConnection):
                         UserWarning)
             self.build_filter_params(params, filters)
         return self.get_list('DescribeImportSnapshotTasks', params,
-                             [('item', ImportTask)], verb='POST')
+                             [('item', ImportSnapshotTask)], verb='POST')
 
     def cancel_import_task(self, import_task_id, cancel_reason=None):
         params = {'ImportTaskId': import_task_id}
         if cancel_reason:
             params['CancelReason'] = cancel_reason
-        return self.get_object('CancelImportTask', params, ImportTask, verb='POST')
+        return self.get_object('CancelImportTask', params, Reservation, verb='POST')
 
     def describe_import_image_tasks(self, import_task_ids=None, filters=None):
         """
@@ -490,7 +516,7 @@ class EC2Connection(AWSQueryConnection):
                         UserWarning)
             self.build_filter_params(params, filters)
         return self.get_list('DescribeImportImageTasks', params,
-                             [('item', ImportTask)], verb='POST')
+                             [('item', ImportImageTask)], verb='POST')
 
     def create_instance_export_task(self, instance_id,  description=None, export_to_s3=None, target_environment=None):
         params = {'InstanceId': instance_id}
@@ -500,7 +526,7 @@ class EC2Connection(AWSQueryConnection):
             params['ExportToS3'] = export_to_s3
         if target_environment:
             params['TargetEnviroment'] = target_environment
-        return self.get_object('CreateInstanceExportTask', params, ExportTask, verb='POST')
+        return self.get_object('CreateInstanceExportTask', params, Reservation, verb='POST')
 
     def describe_export_tasks(self, export_task_ids):
         """
