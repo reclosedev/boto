@@ -1932,7 +1932,7 @@ class EC2Connection(AWSQueryConnection):
         if attach_type is not None:
             params['AttachType'] = attach_type
 
-        return self.get_object('AttachVolume', params, AttachmentSet, verb = 'POST')
+        return self.get_object('AttachVolume', params, AttachmentSet, verb='POST')
 
     def detach_volume(self, volume_id, instance_id=None,
                       device=None, force=False):
@@ -1971,7 +1971,7 @@ class EC2Connection(AWSQueryConnection):
             params['Device'] = device
         if force:
             params['Force'] = 'true'
-        return self.get_object('DetachVolume', params, AttachmentSet, verb = 'POST')
+        return self.get_object('DetachVolume', params, AttachmentSet, verb='POST')
 
     # Snapshot methods
 

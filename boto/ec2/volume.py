@@ -30,7 +30,7 @@ from boto.ec2.ec2object import EC2Object, TaggedEC2Object
 
 
 class TierType(EC2Object):
-    def __init__(self, connection = None):
+    def __init__(self, connection=None):
         EC2Object.__init__(self, connection)
         self.id = None
         self.tier_name = None
@@ -278,7 +278,7 @@ class AttachmentSet(object):
     :ivar device: The device the instance has mapped
     """
 
-    def __init__(self):
+    def __init__(self, parent=None):
         self.id = None
         self.instance_id = None
         self.status = None
