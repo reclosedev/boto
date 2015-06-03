@@ -1,8 +1,15 @@
 ####
 boto
 ####
-boto 2.4.1
-16-May-2012
+boto 2.9.5
+
+Released: 28-May-2013
+
+.. image:: https://travis-ci.org/boto/boto.png?branch=develop
+        :target: https://travis-ci.org/boto/boto
+        
+.. image:: https://pypip.in/d/boto/badge.png
+        :target: https://crate.io/packages/boto/
 
 ************
 Introduction
@@ -11,29 +18,71 @@ Introduction
 Boto is a Python package that provides interfaces to Amazon Web Services.
 At the moment, boto supports:
 
-* Simple Storage Service (S3)
-* SimpleQueue Service (SQS)
-* Elastic Compute Cloud (EC2)
-* Mechanical Turk
-* SimpleDB
-* CloudFront
-* CloudWatch
-* AutoScale
-* Elastic Load Balancer (ELB)
-* Virtual Private Cloud (VPC)
-* Elastic Map Reduce (EMR)
-* Relational Data Service (RDS)
-* Simple Notification Server (SNS)
-* Google Storage
-* Identity and Access Management (IAM)
-* Route53 DNS Service (route53)
-* Simple Email Service (SES)
-* Flexible Payment Service (FPS)
-* CloudFormation
-* Amazon DynamoDB
-* Amazon SimpleWorkflow
-* CloudSearch
-* Marketplace Web Services
+* Compute
+
+  * Amazon Elastic Compute Cloud (EC2)
+  * Amazon Elastic Map Reduce (EMR)
+  * AutoScaling
+
+* Content Delivery
+
+  * Amazon CloudFront
+
+* Database
+
+  * Amazon Relational Data Service (RDS)
+  * Amazon DynamoDB
+  * Amazon SimpleDB
+  * Amazon ElastiCache
+  * Amazon Redshift
+
+* Deployment and Management
+
+  * AWS Elastic Beanstalk
+  * AWS CloudFormation
+  * AWS Data Pipeline
+
+* Identity & Access
+
+  * AWS Identity and Access Management (IAM)
+
+* Application Services
+
+  * Amazon CloudSearch
+  * Amazon Simple Workflow Service (SWF)
+  * Amazon Simple Queue Service (SQS)
+  * Amazon Simple Notification Server (SNS)
+  * Amazon Simple Email Service (SES)
+
+* Monitoring
+
+  * Amazon CloudWatch
+
+* Networking
+
+  * Amazon Route53
+  * Amazon Virtual Private Cloud (VPC)
+  * Elastic Load Balancing (ELB)
+
+* Payments and Billing
+
+  * Amazon Flexible Payment Service (FPS)
+
+* Storage
+
+  * Amazon Simple Storage Service (S3)
+  * Amazon Glacier
+  * Amazon Elastic Block Store (EBS)
+  * Google Cloud Storage
+
+* Workforce
+
+  * Amazon Mechanical Turk
+
+* Other
+
+  * Marketplace Web Services
+  * AWS Support
 
 The goal of boto is to support the full breadth and depth of Amazon
 Web Services.  In addition, boto provides support for other public
@@ -46,15 +95,30 @@ and on Windows.  Boto requires no additional libraries or packages
 other than those that are distributed with Python.  Efforts are made
 to keep boto compatible with Python 2.5.x but no guarantees are made.
 
-*********************************
-Special Note for Python 3.x Users
-*********************************
+************
+Installation
+************
 
-If you are interested in trying out boto with Python 3.x, check out the
-`neo`_ branch.  This is under active development and the goal is a version
-of boto that works in Python 2.6, 2.7, and 3.x.  Not everything is working
-just yet but many things are and it's worth a look if you are an active
-Python 3.x user.
+Install via `pip`_:
+
+::
+
+	$ pip install boto
+
+Install from source:
+
+::
+
+	$ git clone git://github.com/boto/boto.git
+	$ cd boto
+	$ python setup.py install
+
+**********
+ChangeLogs
+**********
+
+To see what has changed over time in boto, you can check out the
+`release notes`_ in the wiki.
 
 ***************************
 Finding Out More About Boto
@@ -72,12 +136,14 @@ Boto releases can be found on the `Python Cheese Shop`_.
 Join our IRC channel `#boto` on FreeNode.
 Webchat IRC channel: http://webchat.freenode.net/?channels=boto
 
+Join the `boto-users Google Group`_.
+
 *************************
 Getting Started with Boto
 *************************
 
 Your credentials can be passed into the methods that create
-connections.  Alternatively, boto will check for the existance of the
+connections.  Alternatively, boto will check for the existence of the
 following environment variables to ascertain your credentials:
 
 **AWS_ACCESS_KEY_ID** - Your AWS Access Key ID
@@ -92,9 +158,12 @@ Copyright (c) 2010-2011, Eucalyptus Systems, Inc.
 Copyright (c) 2012 Amazon.com, Inc. or its affiliates.
 All rights reserved.
 
+.. _pip: http://www.pip-installer.org/
+.. _release notes: https://github.com/boto/boto/wiki
 .. _github.com: http://github.com/boto/boto
 .. _Online documentation: http://docs.pythonboto.org
 .. _Python Cheese Shop: http://pypi.python.org/pypi/boto
 .. _this: http://code.google.com/p/boto/wiki/BotoConfig
 .. _gitflow: http://nvie.com/posts/a-successful-git-branching-model/
 .. _neo: https://github.com/boto/boto/tree/neo
+.. _boto-users Google Group: https://groups.google.com/forum/?fromgroups#!forum/boto-users
