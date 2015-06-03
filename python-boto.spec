@@ -1,18 +1,24 @@
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%if 0%{?rhel} && 0%{?rhel} <= 6
+%{!?__python2: %global __python2 /usr/bin/python2}
+%{!?python2_sitelib: %global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%endif
+
 %define pkgname boto
 
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-%{pkgname}
-Version:        2.9.5
-Release:        3CROC%{?dist}
-License:        MIT
+Version:        2.12.0
+Release:        CROC1%{?dist}
+
 Group:          Development/Languages
+License:        MIT
 URL:            http://github.com/C2Devel/boto
-BuildRequires:  python-devel, python-setuptools
-BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Epoch:          1409529600
 Source0:        %{pkgname}-%{version}.tar.gz
+
+BuildArch:      noarch
+BuildRequires:  python2-devel
+BuildRequires:  python-setuptools
+
 Provides:       %name = %version-%release
 
 %description
@@ -26,20 +32,24 @@ use, lightweight wrapper around the Amazon services.
 %setup -q -n %{pkgname}-%{version}
 
 %build
-%{__python} setup.py build
+%{__python2} setup.py build
 
 %install
-rm -rf $RPM_BUILD_ROOT
-%{__python} setup.py install -O1 --skip-build --root $RPM_BUILD_ROOT
+[ "%buildroot" = "/" ] || rm -rf "%buildroot"
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%{__python2} setup.py install -O1 \
+    --skip-build \
+    --root "%buildroot" \
+    --install-lib="%{python2_sitelib}"
 
 %files
 %defattr(-,root,root,-)
 %doc README.rst
 %{_bindir}/*
-%{python_sitelib}/*
+%{python2_sitelib}/*
+
+%clean
+[ "%buildroot" = "/" ] || rm -rf "%buildroot"
 
 %changelog
 * Tue Jan 13 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.4.1-13
