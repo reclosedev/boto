@@ -59,6 +59,8 @@ class Attachment(object):
             self.id = value
         elif name == 'instanceId':
             self.instance_id = value
+        elif name == 'deviceIndex':
+            self.device_index = int(value)
         elif name == 'instanceOwnerId':
             self.instance_owner_id = value
         elif name == 'status':
@@ -193,8 +195,8 @@ class NetworkInterfaceCollection(list):
         self.extend(interfaces)
 
     def build_list_params(self, params, prefix=''):
-        for i, spec in enumerate(self, 1):
-            full_prefix = '%sNetworkInterface.%s.' % (prefix, i)
+        for i, spec in enumerate(self):
+            full_prefix = '%sNetworkInterface.%s.' % (prefix, i+1)
             if spec.network_interface_id is not None:
                 params[full_prefix + 'NetworkInterfaceId'] = \
                         str(spec.network_interface_id)
@@ -215,18 +217,21 @@ class NetworkInterfaceCollection(list):
                 params[full_prefix + 'PrivateIpAddress'] = \
                         str(spec.private_ip_address)
             if spec.groups is not None:
-                for j, group_id in enumerate(spec.groups, 1):
-                    query_param_key = '%sSecurityGroupId.%s' % (full_prefix, j)
+                for j, group_id in enumerate(spec.groups):
+                    query_param_key = '%sSecurityGroupId.%s' % (full_prefix, j+1)
                     params[query_param_key] = str(group_id)
             if spec.private_ip_addresses is not None:
-                for k, ip_addr in enumerate(spec.private_ip_addresses, 1):
+                for k, ip_addr in enumerate(spec.private_ip_addresses):
                     query_param_key_prefix = (
-                        '%sPrivateIpAddresses.%s' % (full_prefix, k))
+                        '%sPrivateIpAddresses.%s' % (full_prefix, k+1))
                     params[query_param_key_prefix + '.PrivateIpAddress'] = \
                             str(ip_addr.private_ip_address)
                     if ip_addr.primary is not None:
                         params[query_param_key_prefix + '.Primary'] = \
                                 'true' if ip_addr.primary else 'false'
+            if spec.associate_public_ip_address is not None:
+                params[full_prefix + 'AssociatePublicIpAddress'] = \
+                        'true' if spec.associate_public_ip_address else 'false'
 
 
 class NetworkInterfaceSpecification(object):
@@ -234,7 +239,8 @@ class NetworkInterfaceSpecification(object):
                  subnet_id=None, description=None, private_ip_address=None,
                  groups=None, delete_on_termination=None,
                  private_ip_addresses=None,
-                 secondary_private_ip_address_count=None):
+                 secondary_private_ip_address_count=None,
+                 associate_public_ip_address=None):
         self.network_interface_id = network_interface_id
         self.device_index = device_index
         self.subnet_id = subnet_id
@@ -245,3 +251,4 @@ class NetworkInterfaceSpecification(object):
         self.private_ip_addresses = private_ip_addresses
         self.secondary_private_ip_address_count = \
                 secondary_private_ip_address_count
+        self.associate_public_ip_address = associate_public_ip_address

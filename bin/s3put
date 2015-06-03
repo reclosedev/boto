@@ -37,7 +37,9 @@ try:
     multipart_capable = True
     usage_flag_multipart_capable = """ [--multipart]"""
     usage_string_multipart_capable = """
-        multipart - Upload files as multiple parts. This needs filechunkio."""
+        multipart - Upload files as multiple parts. This needs filechunkio.
+                    Requires ListBucket, ListMultipartUploadParts,
+                    ListBucketMultipartUploads and PutObject permissions."""
 except ImportError as err:
     multipart_capable = False
     usage_flag_multipart_capable = ""
@@ -112,9 +114,9 @@ SYNOPSIS
 """
 
 
-def usage():
+def usage(status=1):
     print usage_string
-    sys.exit()
+    sys.exit(status)
 
 
 def submit_cb(bytes_so_far, total_bytes):
@@ -251,12 +253,12 @@ def main():
              'secret_key=', 'no_overwrite', 'reduced', 'header=', 'multipart',
              'host='])
     except:
-        usage()
+        usage(1)
 
     # parse opts
     for o, a in opts:
         if o in ('-h', '--help'):
-            usage()
+            usage(0)
         if o in ('-a', '--access_key'):
             aws_access_key_id = a
         if o in ('-b', '--bucket'):
@@ -297,14 +299,14 @@ def main():
                 multipart_requested = True
             else:
                 print "multipart upload requested but not capable"
-                sys.exit()
+                sys.exit(4)
 
     if len(args) < 1:
-        usage()
+        usage(2)
 
     if not bucket_name:
         print "bucket name is required!"
-        usage()
+        usage(3)
 
     if host:
         c = boto.connect_s3(host=host, aws_access_key_id=aws_access_key_id,
@@ -313,7 +315,7 @@ def main():
         c = boto.connect_s3(aws_access_key_id=aws_access_key_id,
                         aws_secret_access_key=aws_secret_access_key)
     c.debug = debug
-    b = c.get_bucket(bucket_name)
+    b = c.get_bucket(bucket_name, validate=False)
     existing_keys_to_check_against = []
     files_to_check_for_upload = []
 
@@ -350,9 +352,10 @@ def main():
         key_name = get_key_name(fullpath, prefix, key_prefix)
 
         if no_overwrite and key_name in existing_keys_to_check_against:
-            if not quiet:
-                print 'Skipping %s as it exists in s3' % fullpath
-            continue
+            if b.get_key(key_name):
+                if not quiet:
+                    print 'Skipping %s as it exists in s3' % fullpath
+                continue
 
         if not quiet:
             print 'Copying %s to %s/%s' % (fullpath, bucket_name, key_name)
