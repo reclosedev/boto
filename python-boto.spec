@@ -3,14 +3,13 @@
 
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-%{pkgname}
-Version:        2.9.5
+Version:        2.12.0
 Release:        3CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
 BuildRequires:  python-devel, python-setuptools
 BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Epoch:          1409529600
 Source0:        %{pkgname}-%{version}.tar.gz
 Provides:       %name = %version-%release
