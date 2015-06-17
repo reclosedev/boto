@@ -4,7 +4,7 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-%{pkgname}
 Version:        2.12.0
-Release:        4CROC%{?dist}
+Release:        CROC2%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
