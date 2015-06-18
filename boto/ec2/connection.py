@@ -32,9 +32,10 @@ from datetime import timedelta
 
 import boto
 from boto.connection import AWSQueryConnection
-from boto.resultset import ResultSet
+from boto.resultset import ResultSet, BooleanResult
 from boto.ec2.ec2object import PlainXmlDict
 from boto.ec2.image import Image, ImageAttribute, CopyImage
+from boto.ec2.export_task import ExportTask
 from boto.ec2.import_task import ImportImageTask, ImportSnapshotTask
 from boto.ec2.instance import Reservation, Instance
 from boto.ec2.instance import ConsoleOutput, InstanceAttribute
@@ -518,15 +519,30 @@ class EC2Connection(AWSQueryConnection):
         return self.get_list('DescribeImportImageTasks', params,
                              [('item', ImportImageTask)], verb='POST')
 
-    def create_instance_export_task(self, instance_id,  description=None, export_to_s3=None, target_environment=None):
-        params = {'InstanceId': instance_id}
+    def create_instance_export_task(self,
+                                    instance_id,
+                                    s3bucket,
+                                    s3prefix="exportinstancetask",
+                                    description=None,
+                                    target_environment=None,
+                                    container_format="ova",
+                                    disk_image_format="vmdk"):
+        """
+        Create instance export task.
+        """
+        params = {}
+        params["InstanceId"] = instance_id
+        params["ExportToS3TaskSpecification.S3Bucket"] = s3bucket
+        params["ExportToS3TaskSpecification.S3Prefix"] = s3prefix
+        if container_format:
+            params["ExportToS3TaskSpecification.ContainerFormat"] = container_format
+        if disk_image_format:
+            params["ExportToS3TaskSpecification.DiskImageFormat"] = disk_image_format
         if description:
-            params['Description'] = description
-        if export_to_s3:
-            params['ExportToS3'] = export_to_s3
+            params["Description"] = description
         if target_environment:
-            params['TargetEnviroment'] = target_environment
-        return self.get_object('CreateInstanceExportTask', params, Reservation, verb='POST')
+            params["TargetEnvironment"] = target_environment
+        return self.get_object("CreateInstanceExportTask", params, ExportTask, verb="POST")
 
     def describe_export_tasks(self, export_task_ids):
         """
@@ -535,13 +551,13 @@ class EC2Connection(AWSQueryConnection):
         """
         params = {}
         if export_task_ids:
-            self.build_list_params(params, export_task_ids, 'ImportTaskId')
+            self.build_list_params(params, export_task_ids, 'ExportTaskId')
         return self.get_list('DescribeExportTasks', params,
-                             [('item', Reservation)], verb='GET')
+                             [('item', ExportTask)], verb='GET')
 
     def cancel_export_task(self, export_task_id):
         params = {'ExportTaskId': export_task_id}
-        return self.get_object('CancelExportTask', params, ResultSet, verb='POST')
+        return self.get_object('CancelExportTask', params, BooleanResult, verb='POST')
 
     # ImageAttribute methods
 
