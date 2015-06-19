@@ -378,56 +378,11 @@ class EC2Connection(AWSQueryConnection):
         return img.id
 
     # Import Export
-    def import_volume(self, availability_zone, bytes, format, import_manifest_url, size, description=None):
-        params = {'AvailabilityZone': availability_zone,
-                  'Image.Bytes': bytes,
-                  'Image.Format': format,
-                  'Image.ImportManifestUrl': import_manifest_url,
-                  'Volume.Size': size}
-        if description:
-            params['Description'] = description
-
-        return self.get_object('ImportVolume', params, Reservation, verb='POST')
-
-    def import_instance(self, platform, architecture, instance_type, bytes, format, import_manifest_url,
-                        description=None):
-        params = {'Platform': platform}
-        params['LaunchSpecification.Architecture'] = architecture
-        params['LaunchSpecification.InstanceType'] = instance_type
-        params['DiskImage.1.Image.Bytes'] = bytes
-        params['DiskImage.1.Image.Format'] = format
-        params['DiskImage.1.Image.ImportManifestUrl'] = import_manifest_url
-        params['DiskImage.1.Volume.Size'] = bytes
-
-        if description:
-            params['Description'] = description
-        return self.get_object('ImportInstance', params, Reservation, verb='POST')
-
-    def describe_conversion_tasks(self, conversion_task_ids, filters=None):
-        params = {}
-        if conversion_task_ids:
-            self.build_list_params(params, conversion_task_ids, 'ConversionTaskId')
-        if filters:
-            if 'group-id' in filters:
-                gid = filters.get('group-id')
-                if not gid.startswith('sg-') or len(gid) != 11:
-                    warnings.warn(
-                        "The group-id filter now requires a security group "
-                        "identifier (sg-*) instead of a group name. To filter "
-                        "by group name use the 'group-name' filter instead.",
-                        UserWarning)
-            self.build_filter_params(params, filters)
-        return self.get_list('DescribeConversionTasks', params,
-                             [('item', Reservation)], verb='POST')
-
-    def cancel_conversion_task(self, conversion_task_id, reason_message=None):
-        params = {'ConversionTaskId': conversion_task_id}
-        if reason_message:
-            params['ReasonMessage'] = reason_message
-        return self.get_object('CancelConversionTask', params, Reservation, verb='POST')
 
     def import_image(self, disk_containers,
-                     description=None, architecture=None, platform=None):
+                     description=None, architecture=None, platform=None,
+                     # custom arguments
+                     notify=False):
         params = {}
         self.build_dict_list_params(params, disk_containers, 'DiskContainer')
         if architecture:
@@ -436,35 +391,24 @@ class EC2Connection(AWSQueryConnection):
             params['Description'] = description
         if platform:
             params['Platform'] = platform
+        if notify:
+            params['Notify'] = notify
         return self.get_object('ImportImage', params, ImportImageTask, verb='POST')
 
-    def import_snapshot(self, format, bucket, key, url, description=None):
-        params = {}
-        params['DiskContainer.Format'] = format
-        params['DiskContainer.Url'] = url
-        params['DiskContainer.UserBucket.S3Bucket'] = bucket
-        params['DiskContainer.UserBucket.S3Key'] = key
+    def import_snapshot(self, format, bucket, key, url, description=None,
+                        # custom arguments
+                        notify=False):
+        params = {
+            'DiskContainer.Format': format,
+            'DiskContainer.Url': url,
+            'DiskContainer.UserBucket.S3Bucket': bucket,
+            'DiskContainer.UserBucket.S3Key': key,
+        }
         if description:
             params['Description'] = description
+        if notify:
+            params['Notify'] = notify
         return self.get_object('ImportSnapshot', params, ImportSnapshotTask, verb='POST')
-
-    def describe_images(self, owner=None):
-        params = {}
-        if owner == None:
-            params["Owner.1"] = "self"
-        else:
-            params["Owner.1"] = owner
-        return self.get_list('DescribeImages', params,
-                             [('item', Image)], verb='POST')
-
-    def describe_snapshots(self, owner=None):
-        params = {}
-        if owner == None:
-            params["Owner.1"] = "self"
-        else:
-            params["Owner.1"] = owner
-        return self.get_list('DescribeSnapshots', params,
-                             [('item', Snapshot)], verb='POST')
 
     def describe_import_snapshot_tasks(self, import_task_ids=None, filters=None):
         """
@@ -475,14 +419,6 @@ class EC2Connection(AWSQueryConnection):
         if import_task_ids:
             self.build_list_params(params, import_task_ids, 'ImportTaskId')
         if filters:
-            if 'group-id' in filters:
-                gid = filters.get('group-id')
-                if not gid.startswith('sg-') or len(gid) != 11:
-                    warnings.warn(
-                        "The group-id filter now requires a security group "
-                        "identifier (sg-*) instead of a group name. To filter "
-                        "by group name use the 'group-name' filter instead.",
-                        UserWarning)
             self.build_filter_params(params, filters)
         return self.get_list('DescribeImportSnapshotTasks', params,
                              [('item', ImportSnapshotTask)], verb='POST')
@@ -502,14 +438,6 @@ class EC2Connection(AWSQueryConnection):
         if import_task_ids:
             self.build_list_params(params, import_task_ids, 'ImportTaskId')
         if filters:
-            if 'group-id' in filters:
-                gid = filters.get('group-id')
-                if not gid.startswith('sg-') or len(gid) != 11:
-                    warnings.warn(
-                        "The group-id filter now requires a security group "
-                        "identifier (sg-*) instead of a group name. To filter "
-                        "by group name use the 'group-name' filter instead.",
-                        UserWarning)
             self.build_filter_params(params, filters)
         return self.get_list('DescribeImportImageTasks', params,
                              [('item', ImportImageTask)], verb='POST')
@@ -517,27 +445,32 @@ class EC2Connection(AWSQueryConnection):
     def create_instance_export_task(self,
                                     instance_id,
                                     s3bucket,
-                                    s3prefix="exportinstancetask",
+                                    s3prefix=None,
                                     description=None,
                                     target_environment=None,
-                                    container_format="ova",
-                                    disk_image_format="vmdk"):
+                                    container_format="OVA",
+                                    disk_image_format="VMDK",
+                                    # custom parameters
+                                    notify=False):
         """
         Create instance export task.
         """
-        params = {}
-        params["InstanceId"] = instance_id
-        params["ExportToS3TaskSpecification.S3Bucket"] = s3bucket
-        params["ExportToS3TaskSpecification.S3Prefix"] = s3prefix
+        params = {
+            'InstanceId': instance_id,
+            'ExportToS3TaskSpecification.S3Bucket': s3bucket,
+            'ExportToS3TaskSpecification.S3Prefix': s3prefix,
+        }
         if container_format:
-            params["ExportToS3TaskSpecification.ContainerFormat"] = container_format
+            params['ExportToS3TaskSpecification.ContainerFormat'] = container_format
         if disk_image_format:
-            params["ExportToS3TaskSpecification.DiskImageFormat"] = disk_image_format
+            params['ExportToS3TaskSpecification.DiskImageFormat'] = disk_image_format
         if description:
-            params["Description"] = description
+            params['Description'] = description
         if target_environment:
-            params["TargetEnvironment"] = target_environment
-        return self.get_object("CreateInstanceExportTask", params, ExportTask, verb="POST")
+            params['TargetEnvironment'] = target_environment
+        if notify:
+            params['Notify'] = notify
+        return self.get_object('CreateInstanceExportTask', params, ExportTask, verb='POST')
 
     def describe_export_tasks(self, export_task_ids):
         """

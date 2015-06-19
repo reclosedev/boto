@@ -1,77 +1,14 @@
-from boto.ec2.ec2object import TaggedEC2Object, EC2Object
+from boto.ec2.ec2object import EC2Object
 
-
-class ImportSnapshotTask(TaggedEC2Object):
-    """
-    Represents an EC2 ImportSnapshotTask
-    """
-
-    def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
-        self.request_id = None
-        self.description = None
-        self.id = None
-        self.disk_image_size = None
-        self.format = None
-        self.snapshot_id = None
-        self.progress = None
-        self.status = None
-        self.status_message = None
-        self.url = None
-        self.bucket_name = None
-        self.bucket_path = None
-
-    def __repr__(self):
-        return 'ImportSnapshotTask:%s' % self.id
-
-    def endElement(self, name, value, connection):
-        if name == 'description':
-            self.description = value
-        elif name == 'importTaskId':
-            self.id = value
-        elif name == 'diskImageSize':
-            self.disk_image_size = value
-        elif name == 'format':
-            self.format = value
-        elif name == 'snapshotId':
-            self.snapshot_id = value
-        elif name == 'progress':
-            self.progress = value
-        elif name == 'status':
-            self.status = value
-        elif name == 'statusMessage':
-            self.status_message = value
-        elif name == 'url':
-            self.url = value
-        elif name == 's3Bucket':
-            self.bucket_name = value
-        elif name == 's3Key':
-            self.bucket_path = value
-        else:
-            setattr(self, name, value)
-
-
-class UserBucketDetails(EC2Object):
-    def __init__(self, connection=None):
-        EC2Object.__init__(self, connection)
-        self.bucket_name = None
-        self.bucket_path = None
-
-    def startElement(self, name, attrs, connection):
-        pass
-
-    def endElement(self, name, value, connection):
-        if name == 's3Bucket':
-            self.bucket_name = value
-        elif name == 's3Key':
-            self.bucket_path = value
 
 SNAPSHOT_DETAIL_ATTRS = ['description', 'deviceName', 'diskImageSize', 'format', 'progress', 'snapshotId',
                          'status', 'statusMessage', 'url']
 
-class SnapshotDetail(object):
+
+class SnapshotDetail(EC2Object):
     def __init__(self, connection=None, description=None, device_name=None, disk_image_size=None, format=None,
                  progress=None, snapshot_id=None, status=None, status_message=None, url=None):
+        EC2Object.__init__(self, connection)
         self.connection = connection
         self.description = description
         self.device_name = device_name
@@ -110,6 +47,8 @@ class SnapshotDetail(object):
             self.status_message = value
         elif name == 'url':
             self.url = value
+        else:
+            setattr(self, name, value)
 
 
 class SnapshotDetails(list):
@@ -126,6 +65,26 @@ class SnapshotDetails(list):
 
     def endElement(self, name, value, connection):
         pass
+
+
+class ImportSnapshotTask(SnapshotDetail):
+    """
+    Represents an EC2 ImportSnapshotTask
+    """
+
+    def __init__(self, connection=None):
+        SnapshotDetail.__init__(self, connection)
+        self.request_id = None
+        self.id = None
+
+    def __repr__(self):
+        return 'ImportSnapshotTask:%s' % self.id
+
+    def endElement(self, name, value, connection):
+        super(ImportSnapshotTask, self).endElement(name, value, connection)
+        if name == 'importTaskId':
+            self.id = value
+
 
 
 class ImportImageTask(EC2Object):
@@ -183,3 +142,21 @@ class ImportImageTask(EC2Object):
             self.status = value
         elif name == 'statusMessage':
             self.status_message = value
+        else:
+            setattr(self, name, value)
+
+
+class UserBucketDetails(EC2Object):
+    def __init__(self, connection=None):
+        EC2Object.__init__(self, connection)
+        self.bucket_name = None
+        self.bucket_path = None
+
+    def startElement(self, name, attrs, connection):
+        pass
+
+    def endElement(self, name, value, connection):
+        if name == 's3Bucket':
+            self.bucket_name = value
+        elif name == 's3Key':
+            self.bucket_path = value

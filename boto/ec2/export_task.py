@@ -13,8 +13,8 @@ class ExportTask(TaggedEC2Object):
         self.id = None
         self.container_format = None
         self.disk_image_format = None
-        self.s3_bucket = None
-        self.s3_key = None
+        self.bucket_name = self.s3_bucket = None
+        self.bucket_path = self.s3_key = None
         self.instance_id = None
         self.target_environment = None
         self.state = None
@@ -30,9 +30,9 @@ class ExportTask(TaggedEC2Object):
         elif name == 'diskImageFormat':
             self.disk_image_format = value
         elif name == 's3Bucket':
-            self.s3_bucket = value
+            self.bucket_name = self.s3_bucket = value
         elif name == 's3Key':
-            self.s3_key = value
+            self.bucket_path = self.s3_key = value
         elif name == 'instanceId':
             self.instance_id = value
         elif name == 'targetEnvironment':
@@ -41,3 +41,5 @@ class ExportTask(TaggedEC2Object):
             self.state = value
         elif name == 'statusMessage':
             self.status_message= value
+        else:
+            setattr(self, name, value)
