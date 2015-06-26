@@ -33,7 +33,7 @@ from boto.connection import AWSQueryConnection
 from boto.resultset import ResultSet, BooleanResult
 from boto.ec2.ec2object import PlainXmlDict
 from boto.ec2.image import Image, ImageAttribute
-from boto.ec2.export_task import ExportTask
+from boto.ec2.export_task import ExportTask, ExportVolumeTask
 from boto.ec2.import_task import ImportImageTask, ImportSnapshotTask
 from boto.ec2.instance import Reservation, Instance
 from boto.ec2.instance import ConsoleOutput, InstanceAttribute
@@ -442,14 +442,8 @@ class EC2Connection(AWSQueryConnection):
         return self.get_list('DescribeImportImageTasks', params,
                              [('item', ImportImageTask)], verb='POST')
 
-    def create_instance_export_task(self,
-                                    instance_id,
-                                    s3bucket,
-                                    s3prefix=None,
-                                    description=None,
-                                    target_environment=None,
-                                    container_format="OVA",
-                                    disk_image_format="VMDK",
+    def create_instance_export_task(self, instance_id, s3_bucket, s3_prefix=None, description=None,
+                                    target_environment=None, container_format="OVA", disk_image_format="VMDK",
                                     # custom parameters
                                     notify=False):
         """
@@ -457,9 +451,10 @@ class EC2Connection(AWSQueryConnection):
         """
         params = {
             'InstanceId': instance_id,
-            'ExportToS3TaskSpecification.S3Bucket': s3bucket,
-            'ExportToS3TaskSpecification.S3Prefix': s3prefix,
+            'ExportToS3TaskSpecification.S3Bucket': s3_bucket,
         }
+        if s3_prefix:
+            params['ExportToS3TaskSpecification.S3Prefix'] = s3_prefix
         if container_format:
             params['ExportToS3TaskSpecification.ContainerFormat'] = container_format
         if disk_image_format:
@@ -486,6 +481,37 @@ class EC2Connection(AWSQueryConnection):
     def cancel_export_task(self, export_task_id):
         params = {'ExportTaskId': export_task_id}
         return self.get_object('CancelExportTask', params, BooleanResult, verb='POST')
+
+    # Custom volume export methods
+
+    def create_volume_export_task(self, volume_id, s3_bucket, s3_prefix=None, description=None,
+                                  disk_image_format=None, notify=False):
+        """
+        Create volume export task.
+        """
+        params = {
+            'VolumeId': volume_id,
+            'ExportToS3TaskSpecification.S3Bucket': s3_bucket,
+        }
+        if s3_prefix:
+            params['ExportToS3TaskSpecification.S3Prefix'] = s3_prefix
+        if disk_image_format:
+            params['ExportToS3TaskSpecification.DiskImageFormat'] = disk_image_format
+        if description:
+            params['Description'] = description
+        if notify:
+            params['Notify'] = notify
+        return self.get_object('CreateVolumeExportTask', params, ExportVolumeTask, verb='POST')
+
+    def describe_export_volume_tasks(self, export_task_ids):
+        """
+        Retrieve all the export volumes tasks associated with your account.
+        """
+        params = {}
+        if export_task_ids:
+            self.build_list_params(params, export_task_ids, 'ExportTaskId')
+        return self.get_list('DescribeExportVolumeTasks', params,
+                             [('item', ExportVolumeTask)], verb='GET')
 
     # ImageAttribute methods
 
