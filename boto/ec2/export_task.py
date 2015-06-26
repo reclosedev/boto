@@ -3,7 +3,7 @@ from boto.ec2.ec2object import TaggedEC2Object
 
 class ExportTask(TaggedEC2Object):
     """
-    Represents an EC2 ImportTask
+    Represents an EC2 ExportTask
     """
 
     def __init__(self, connection=None):
@@ -43,3 +43,18 @@ class ExportTask(TaggedEC2Object):
             self.status_message= value
         else:
             setattr(self, name, value)
+
+
+class ExportVolumeTask(ExportTask):
+    """
+    Represents custom EC2 ExportVolumeTask
+    """
+
+    def __init__(self, connection=None):
+        super(ExportVolumeTask, self).__init__(connection)
+        self.volume_id = None
+
+    def endElement(self, name, value, connection):
+        super(ExportVolumeTask, self).endElement(name, value, connection)
+        if name == "volumeId":
+            self.volume_id = value
