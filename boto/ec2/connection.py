@@ -487,6 +487,12 @@ class EC2Connection(AWSQueryConnection):
         params = {'ExportTaskId': export_task_id}
         return self.get_object('CancelExportTask', params, BooleanResult, verb='POST')
 
+    # Custom method for changing task priority
+
+    def modify_task_priority(self, task_id, priority):
+        params = {'TaskId': task_id, 'Priority': priority}
+        return self.get_object('ModifyTaskPriority', params, BooleanResult, verb='POST')
+
     # Custom volume export methods
 
     def create_volume_export_task(self, volume_id, s3_bucket, s3_prefix=None, description=None,
