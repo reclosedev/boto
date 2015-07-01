@@ -451,14 +451,14 @@ class EC2Connection(AWSQueryConnection):
         """
         params = {
             'InstanceId': instance_id,
-            'ExportToS3TaskSpecification.S3Bucket': s3_bucket,
+            'ExportToS3.S3Bucket': s3_bucket,
         }
         if s3_prefix:
-            params['ExportToS3TaskSpecification.S3Prefix'] = s3_prefix
+            params['ExportToS3.S3Prefix'] = s3_prefix
         if container_format:
-            params['ExportToS3TaskSpecification.ContainerFormat'] = container_format
+            params['ExportToS3.ContainerFormat'] = container_format
         if disk_image_format:
-            params['ExportToS3TaskSpecification.DiskImageFormat'] = disk_image_format
+            params['ExportToS3.DiskImageFormat'] = disk_image_format
         if description:
             params['Description'] = description
         if target_environment:
@@ -497,12 +497,12 @@ class EC2Connection(AWSQueryConnection):
         """
         params = {
             'VolumeId': volume_id,
-            'ExportToS3TaskSpecification.S3Bucket': s3_bucket,
+            'ExportToS3.S3Bucket': s3_bucket,
         }
         if s3_prefix:
-            params['ExportToS3TaskSpecification.S3Prefix'] = s3_prefix
+            params['ExportToS3.S3Prefix'] = s3_prefix
         if disk_image_format:
-            params['ExportToS3TaskSpecification.DiskImageFormat'] = disk_image_format
+            params['ExportToS3.DiskImageFormat'] = disk_image_format
         if description:
             params['Description'] = description
         if notify:
