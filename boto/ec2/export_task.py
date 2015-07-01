@@ -1,13 +1,13 @@
-from boto.ec2.ec2object import TaggedEC2Object
+from boto.ec2.ec2object import EC2Object
 
 
-class ExportTask(TaggedEC2Object):
+class ExportTask(EC2Object):
     """
     Represents an EC2 ExportTask
     """
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        EC2Object.__init__(self, connection)
         self.request_id = None
         self.description = None
         self.id = None
@@ -19,7 +19,18 @@ class ExportTask(TaggedEC2Object):
         self.target_environment = None
         self.state = None
         self.status_message = None
-        
+        self.volume_export_details = None
+
+    def startElement(self, name, attrs, connection):
+        retval = EC2Object.startElement(self, name, attrs, connection)
+        if retval is not None:
+            return retval
+
+        if name == 'volumeExportDetails':
+            self.volume_export_details = VolumeExportDetails()
+            return self.volume_export_details
+        return None
+
     def endElement(self, name, value, connection):
         if name == 'description':
             self.description = value
@@ -58,3 +69,18 @@ class ExportVolumeTask(ExportTask):
         super(ExportVolumeTask, self).endElement(name, value, connection)
         if name == "volumeId":
             self.volume_id = value
+
+
+class VolumeExportDetails(list):
+    def __init__(self, connection=None):
+        list.__init__(self)
+        self.connection = connection
+
+    def startElement(self, name, attrs, connection):
+        if name == 'item':
+            item = ExportVolumeTask(self)
+            self.append(item)
+            return item
+
+    def endElement(self, name, value, connection):
+        pass
