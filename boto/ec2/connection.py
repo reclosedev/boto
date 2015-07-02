@@ -384,10 +384,20 @@ class EC2Connection(AWSQueryConnection):
 
     # Import Export
 
-    def import_image(self, disk_containers,
-                     description=None, architecture=None, platform=None,
+    def import_image(self, disk_containers, description=None,
+                     architecture=None, platform=None,
                      # custom arguments
                      notify=False):
+        """ Create import image tasks
+
+        :param disk_containers: list of disk containers, format
+                                ``[{"Format": "RAW", "UserBucket": {"S3Bucket": "bucket", "S3Key": "key"}}]``
+        :param description: Image description
+        :param architecture: The architecture of the virtual machine. Valid values: i386 | x86_64
+        :param platform: The operating system of the virtual machine. Valid values: Windows | Linux
+        :param notify: Notify about task statuses by email
+        :return: ``ImportImageTask``
+        """
         params = {}
         self.build_dict_list_params(params, disk_containers, 'DiskContainer')
         if architecture:
@@ -400,12 +410,22 @@ class EC2Connection(AWSQueryConnection):
             params['Notify'] = notify
         return self.get_object('ImportImage', params, ImportImageTask, verb='POST')
 
-    def import_snapshot(self, format, bucket, key, url, description=None,
+    def import_snapshot(self, format, bucket, key, url=None, description=None,
                         # custom arguments
                         notify=False):
+        """ Create import snapshot task
+
+        :param format: Source format
+        :param bucket: The name of the S3 bucket where the disk image is located.
+        :param key: The key for the disk image.
+        :param url:
+        :param description: Snapshot description
+        :param notify: Notify about task statuses by email
+        :return: ``ImportSnapshotTask``
+        """
         params = {
             'DiskContainer.Format': format,
-            'DiskContainer.Url': url,
+            'DiskContainer.Url': url or '',
             'DiskContainer.UserBucket.S3Bucket': bucket,
             'DiskContainer.UserBucket.S3Key': key,
         }
@@ -417,8 +437,9 @@ class EC2Connection(AWSQueryConnection):
 
     def describe_import_snapshot_tasks(self, import_task_ids=None, filters=None):
         """
-        Retrieve all the import snapshot tasks associated with your account.
+        Returns information about import snapshot tasks
 
+        :param import_task_ids: List of task IDs, if ``None`` all tasks associated with account are returned
         """
         params = {}
         if import_task_ids:
@@ -429,6 +450,11 @@ class EC2Connection(AWSQueryConnection):
                              [('item', ImportSnapshotTask)], verb='POST')
 
     def cancel_import_task(self, import_task_id, cancel_reason=None):
+        """ Cancel import task
+
+        :param import_task_id: Task ID
+        :param cancel_reason: Cancel reason (optional)
+        """
         params = {'ImportTaskId': import_task_id}
         if cancel_reason:
             params['CancelReason'] = cancel_reason
@@ -436,8 +462,9 @@ class EC2Connection(AWSQueryConnection):
 
     def describe_import_image_tasks(self, import_task_ids=None, filters=None):
         """
-        Retrieve all the import image tasks associated with your account.
+        Return information about import image tasks
 
+        :param import_task_ids: List of task IDs, if ``None`` all tasks associated with account are returned
         """
         params = {}
         if import_task_ids:
@@ -451,8 +478,17 @@ class EC2Connection(AWSQueryConnection):
                                     target_environment=None, container_format="OVA", disk_image_format="VMDK",
                                     # custom parameters
                                     notify=False):
-        """
-        Create instance export task.
+        """ Create instance export task
+
+        :param instance_id: The ID of the instance.
+        :param s3_bucket: The S3 bucket for the destination image.
+        :param s3_prefix: The image is written to a single object in the S3 bucket at the S3 key
+                          s3_prefix + exportTaskId + '.' + disk_image_format.
+        :param description: A description for the conversion task or the resource being exported.
+        :param target_environment: The target virtualization environment.
+        :param container_format: The container format used to combine disk images
+        :param disk_image_format: The format for the exported image.
+        :param notify: Notify about task statuses by email
         """
         params = {
             'InstanceId': instance_id,
@@ -474,8 +510,9 @@ class EC2Connection(AWSQueryConnection):
 
     def describe_export_tasks(self, export_task_ids):
         """
-        Retrieve all the export tasks associated with your account.
+        Return information about export instance tasks
 
+        :param export_task_ids: List of task IDs, if ``None`` all tasks associated with account are returned
         """
         params = {}
         if export_task_ids:
@@ -484,12 +521,21 @@ class EC2Connection(AWSQueryConnection):
                              [('item', ExportTask)], verb='GET')
 
     def cancel_export_task(self, export_task_id):
+        """ Cancel export task
+
+        :param export_task_id: Task ID
+        """
         params = {'ExportTaskId': export_task_id}
         return self.get_object('CancelExportTask', params, BooleanResult, verb='POST')
 
     # Custom method for changing task priority
 
     def modify_task_priority(self, task_id, priority):
+        """ Modify task priority
+
+        :param task_id: Task ID
+        :param priority: Priority (-1, 0, 1)
+        """
         params = {'TaskId': task_id, 'Priority': priority}
         return self.get_object('ModifyTaskPriority', params, BooleanResult, verb='POST')
 
@@ -497,8 +543,15 @@ class EC2Connection(AWSQueryConnection):
 
     def create_volume_export_task(self, volume_id, s3_bucket, s3_prefix=None, description=None,
                                   disk_image_format=None, notify=False):
-        """
-        Create volume export task.
+        """ Create instance export task
+
+        :param volume_id: The ID of the volume.
+        :param s3_bucket: The S3 bucket for the destination image.
+        :param s3_prefix: The image is written to a single object in the S3 bucket at the S3 key
+                          s3_prefix + exportTaskId + '.' + disk_image_format.
+        :param description: A description for the conversion task or the resource being exported.
+        :param disk_image_format: The format for the exported image.
+        :param notify: Notify about task statuses by email
         """
         params = {
             'VolumeId': volume_id,
@@ -516,7 +569,9 @@ class EC2Connection(AWSQueryConnection):
 
     def describe_export_volume_tasks(self, export_task_ids):
         """
-        Retrieve all the export volumes tasks associated with your account.
+        Return information about export volume tasks
+
+        :param export_task_ids: List of task IDs, if ``None`` all tasks associated with account are returned
         """
         params = {}
         if export_task_ids:
