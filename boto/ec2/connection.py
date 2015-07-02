@@ -382,7 +382,7 @@ class EC2Connection(AWSQueryConnection):
     def import_image(self, disk_containers, description=None,
                      architecture=None, platform=None,
                      # custom arguments
-                     notify=False):
+                     notify=False, email=None):
         """ Create import image tasks
 
         :param disk_containers: list of disk containers, format
@@ -390,7 +390,9 @@ class EC2Connection(AWSQueryConnection):
         :param description: Image description
         :param architecture: The architecture of the virtual machine. Valid values: i386 | x86_64
         :param platform: The operating system of the virtual machine. Valid values: Windows | Linux
-        :param notify: Notify about task statuses by email
+
+        :param notify: (custom) Notify about task statuses by email
+        :param email: (custom) Email for notifications. Comma separated or `None` for user email
         :return: ``ImportImageTask``
         """
         params = {}
@@ -403,11 +405,13 @@ class EC2Connection(AWSQueryConnection):
             params['Platform'] = platform
         if notify:
             params['Notify'] = notify
+        if email:
+            params['Email'] = email
         return self.get_object('ImportImage', params, ImportImageTask, verb='POST')
 
     def import_snapshot(self, bucket, key, disk_format=None, url=None, description=None,
                         # custom arguments
-                        notify=False):
+                        notify=False, email=None):
         """ Create import snapshot task
 
 
@@ -416,7 +420,8 @@ class EC2Connection(AWSQueryConnection):
         :param disk_format: The format of the disk image being imported.
         :param url: The URL to the Amazon S3-based disk image being imported
         :param description: Snapshot description
-        :param notify: Notify about task statuses by email
+        :param notify: (custom) Notify about task statuses by email
+        :param email: (custom) Email for notifications. Comma separated or `None` for user email
         :return: ``ImportSnapshotTask``
         """
         params = {
@@ -429,6 +434,8 @@ class EC2Connection(AWSQueryConnection):
             params['Description'] = description
         if notify:
             params['Notify'] = notify
+        if email:
+            params['Email'] = email
         return self.get_object('ImportSnapshot', params, ImportSnapshotTask, verb='POST')
 
     def describe_import_snapshot_tasks(self, import_task_ids=None, filters=None):
@@ -473,7 +480,7 @@ class EC2Connection(AWSQueryConnection):
     def create_instance_export_task(self, instance_id, s3_bucket, s3_prefix=None, description=None,
                                     target_environment=None, container_format="OVA", disk_image_format="VMDK",
                                     # custom parameters
-                                    notify=False):
+                                    notify=False, email=None):
         """ Create instance export task
 
         :param instance_id: The ID of the instance.
@@ -484,7 +491,8 @@ class EC2Connection(AWSQueryConnection):
         :param target_environment: The target virtualization environment.
         :param container_format: The container format used to combine disk images
         :param disk_image_format: The format for the exported image.
-        :param notify: Notify about task statuses by email
+        :param notify: (custom) Notify about task statuses by email
+        :param email: (custom) Email for notifications. Comma separated or `None` for user email
         """
         params = {
             'InstanceId': instance_id,
@@ -502,6 +510,8 @@ class EC2Connection(AWSQueryConnection):
             params['TargetEnvironment'] = target_environment
         if notify:
             params['Notify'] = notify
+        if email:
+            params['Email'] = email
         return self.get_object('CreateInstanceExportTask', params, ExportTask, verb='POST')
 
     def describe_export_tasks(self, export_task_ids):
@@ -538,7 +548,7 @@ class EC2Connection(AWSQueryConnection):
     # Custom volume export methods
 
     def create_volume_export_task(self, volume_id, s3_bucket, s3_prefix=None, description=None,
-                                  disk_image_format=None, notify=False):
+                                  disk_image_format=None, notify=False, email=None):
         """ Create instance export task
 
         :param volume_id: The ID of the volume.
@@ -547,7 +557,8 @@ class EC2Connection(AWSQueryConnection):
                           s3_prefix + exportTaskId + '.' + disk_image_format.
         :param description: A description for the conversion task or the resource being exported.
         :param disk_image_format: The format for the exported image.
-        :param notify: Notify about task statuses by email
+        :param notify: (custom) Notify about task statuses by email
+        :param email: (custom) Email for notifications. Comma separated or `None` for user email
         """
         params = {
             'VolumeId': volume_id,
@@ -561,6 +572,8 @@ class EC2Connection(AWSQueryConnection):
             params['Description'] = description
         if notify:
             params['Notify'] = notify
+        if email:
+            params['Email'] = email
         return self.get_object('CreateVolumeExportTask', params, ExportVolumeTask, verb='POST')
 
     def describe_export_volume_tasks(self, export_task_ids):
