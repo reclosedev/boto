@@ -410,21 +410,22 @@ class EC2Connection(AWSQueryConnection):
             params['Notify'] = notify
         return self.get_object('ImportImage', params, ImportImageTask, verb='POST')
 
-    def import_snapshot(self, format, bucket, key, url=None, description=None,
+    def import_snapshot(self, bucket, key, disk_format=None, url=None, description=None,
                         # custom arguments
                         notify=False):
         """ Create import snapshot task
 
-        :param format: Source format
+
         :param bucket: The name of the S3 bucket where the disk image is located.
         :param key: The key for the disk image.
-        :param url:
+        :param disk_format: The format of the disk image being imported.
+        :param url: The URL to the Amazon S3-based disk image being imported
         :param description: Snapshot description
         :param notify: Notify about task statuses by email
         :return: ``ImportSnapshotTask``
         """
         params = {
-            'DiskContainer.Format': format,
+            'DiskContainer.Format': disk_format or '',
             'DiskContainer.Url': url or '',
             'DiskContainer.UserBucket.S3Bucket': bucket,
             'DiskContainer.UserBucket.S3Key': key,
