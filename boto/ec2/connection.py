@@ -824,7 +824,7 @@ class EC2Connection(AWSQueryConnection):
                       ebs_optimized=False, network_interfaces=None,
                       high_available=None,
                       root_device_name=None, public_addressing=None,
-                      virtualization_type=None, description=None, 
+                      virtualization_type=None, description=None,
                       private_dns_name=None):
         """
         Runs an image on EC2.
