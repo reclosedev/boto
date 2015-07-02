@@ -86,7 +86,6 @@ class ImportSnapshotTask(SnapshotDetail):
             self.id = value
 
 
-
 class ImportImageTask(EC2Object):
     """
     Represents an EC2 ImportImageTask
