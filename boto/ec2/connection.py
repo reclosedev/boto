@@ -145,24 +145,26 @@ class EC2Connection(AWSQueryConnection):
     def build_dict_list_params(self, params, items, label):
         if isinstance(items, str):
             items = [items]
-        for i in range(1, len(items) + 1):
-            item = items[i - 1]
+        for i, item in enumerate(items, 1):
             if isinstance(item, dict):
-                for key, value in self._flatten_dict(item).iteritems():
+                for key, value in self._flatten_dict(item):
                     params['%s.%d.%s' % (label, i, key)] = value
             else:
                 params['%s.%d' % (label, i)] = item
 
-    def _flatten_dict(self, d):
-        def expand(key, value):
-            if isinstance(value, dict):
-                return [(key + '.' + k, v) for k, v in self._flatten_dict(value).items()]
+    @staticmethod
+    def _flatten_dict(d):
+        def traverse_dict(dct, base_keys=None):
+            if base_keys is None:
+                base_keys = []
+            if isinstance(dct, dict):
+                for key, value in dct.items():
+                    for path, val in traverse_dict(value, base_keys + [key]):
+                        yield path, val
             else:
-                return [(key, value)]
+                yield base_keys, dct
 
-        items = [item for k, v in d.items() for item in expand(k, v)]
-
-        return dict(items)
+        return [(".".join(keys), value) for keys, value in traverse_dict(d)]
 
     # Image methods
 

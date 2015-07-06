@@ -29,24 +29,14 @@ class SnapshotDetail(EC2Object):
             return None
 
     def endElement(self, name, value, connection):
-        if name == 'description':
-            self.description = value
-        elif name == 'deviceName':
+        if name == 'deviceName':
             self.device_name = value
         elif name == 'diskImageSize':
             self.disk_image_size = value
-        elif name == 'format':
-            self.format = value
-        elif name == 'progress':
-            self.progress = value
         elif name == 'snapshotId':
             self.snapshot_id = value
-        elif name == 'status':
-            self.status = value
         elif name == 'statusMessage':
             self.status_message = value
-        elif name == 'url':
-            self.url = value
         else:
             setattr(self, name, value)
 
@@ -121,24 +111,12 @@ class ImportImageTask(EC2Object):
             return None
         
     def endElement(self, name, value, connection):
-        if name == 'architecture':
-            self.architecture = value
-        elif name == 'description':
-            self.description = value
-        elif name == 'hypervisor':
-            self.hypervisor = value
-        elif name == 'imageId':
+        if name == 'imageId':
             self.image_id = value
         elif name == 'importTaskId':
             self.id = value
         elif name == 'licenseType':
             self.license_type = value
-        elif name == 'platform':
-            self.platform = value
-        elif name == 'progress':
-            self.progress = value
-        elif name == 'status':
-            self.status = value
         elif name == 'statusMessage':
             self.status_message = value
         else:
