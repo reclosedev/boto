@@ -32,9 +32,7 @@ class ExportTask(EC2Object):
         return None
 
     def endElement(self, name, value, connection):
-        if name == 'description':
-            self.description = value
-        elif name == 'exportTaskId':
+        if name == 'exportTaskId':
             self.id = value
         elif name == 'containerFormat':
             self.container_format= value
@@ -48,8 +46,6 @@ class ExportTask(EC2Object):
             self.instance_id = value
         elif name == 'targetEnvironment':
             self.target_environment = value
-        elif name == 'state':
-            self.state = value
         elif name == 'statusMessage':
             self.status_message= value
         else:
