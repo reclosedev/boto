@@ -4,7 +4,7 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-%{pkgname}
 Version:        2.12.0
-Release:        CROC2%{?dist}
+Release:        2CROC%{?dist}
 License:        MIT
 Group:          Development/Languages
 URL:            http://github.com/C2Devel/boto
@@ -41,6 +41,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Fri Jul 03 2015 Vadim Radovel <vadim@radovel.ru> - 2.4.1-14
+- https unverified for python 2.7.9
+
 * Tue Jan 13 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.4.1-13
 - Added field private_ip_address into response.
 - Added 'get_vpc_attribute' and 'modify_vpc_attribute' methods.
