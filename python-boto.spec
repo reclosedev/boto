@@ -52,6 +52,11 @@ use, lightweight wrapper around the Amazon services.
 [ "%buildroot" = "/" ] || rm -rf "%buildroot"
 
 %changelog
+* Thu Jul 23 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.12.0-1
+- Updated to 2.12.0.
+- Cleanup RPM spec, removed 'epoch' field.
+- Added volume attribute 'Iops'.
+
 * Fri Jul 03 2015 Vadim Radovel <vadim@radovel.ru> - 2.4.1-14
 - https unverified for python 2.7.9
 
