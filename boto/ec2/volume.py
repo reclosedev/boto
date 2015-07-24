@@ -320,10 +320,10 @@ class VolumeAttribute:
 
     def endElement(self, name, value, connection):
         if name == 'value':
-            if name in ('autoEnableIO', 'replication'):
-                self.attrs[self._key_name] = (value.lower() == 'true')
-            else:
+            if name in ('tierType', 'tierName'):
                 self.attrs[self._key_name] = value
+            else:
+                self.attrs[self._key_name] = (value.lower() == 'true')
         elif name == 'volumeId':
             self.id = value
         else:
