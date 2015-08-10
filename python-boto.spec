@@ -56,6 +56,7 @@ use, lightweight wrapper around the Amazon services.
 - Updated to 2.12.0.
 - Cleanup RPM spec, removed 'epoch' field.
 - Added volume attribute 'Iops'.
+- Fix VolumeAttribute bool attrs.
 
 * Fri Jul 03 2015 Vadim Radovel <vadim@radovel.ru> - 2.4.1-14
 - https unverified for python 2.7.9
