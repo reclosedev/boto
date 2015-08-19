@@ -5,11 +5,8 @@ boto 2.12.0
 
 Released: 04-September-2013
 
-.. image:: https://travis-ci.org/boto/boto.png?branch=develop
-        :target: https://travis-ci.org/boto/boto
-        
-.. image:: https://pypip.in/d/boto/badge.png
-        :target: https://crate.io/packages/boto/
+.. image:: https://travis-ci.org/C2Devel/boto.png?branch=master
+        :target: https://travis-ci.org/C2Devel/boto
 
 ************
 Introduction
