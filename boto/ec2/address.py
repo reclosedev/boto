@@ -71,8 +71,6 @@ class Address(EC2Object):
             self.private_ip_address = value
         elif name == 'privateIpAddressId':
             self.private_ip_address_id = value
-        elif name == 'privateIpAddress':
-            self.private_ip_address = value
         else:
             setattr(self, name, value)
 
