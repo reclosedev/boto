@@ -8,7 +8,8 @@
 Summary:        A simple lightweight interface to Amazon Web Services
 Name:           python-%{pkgname}
 Version:        2.12.0
-Release:        CROC1%{?dist}
+Release:        CROC2%{?dist}
+Epoch:          1441065600
 
 Group:          Development/Languages
 License:        MIT
@@ -52,6 +53,10 @@ use, lightweight wrapper around the Amazon services.
 [ "%buildroot" = "/" ] || rm -rf "%buildroot"
 
 %changelog
+* Wed Aug 19 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.12.0-2
+- Fix duplicate private_ip_address field
+- Restore 'epoch' field for overriding default python-boto package
+
 * Thu Jul 23 2015 Mikhail Ushanov <gm.mephisto@gmail.com> - 2.12.0-1
 - Updated to 2.12.0.
 - Cleanup RPM spec, removed 'epoch' field.
